@@ -5,17 +5,21 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.dylanc.viewbinding.nonreflection.binding
 import com.julive.audio.RecorderConfig
 import com.julive.audio.RecorderManager
 import com.julive.audio.common.RecorderOutFormat
-import kotlinx.android.synthetic.main.activity_main.*
+import com.julive.recorder.databinding.ActivityMainBinding
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
+import kotlin.getValue
 
 
 class MainActivity : AppCompatActivity() ,EasyPermissions.PermissionCallbacks{
+
+    private val binding by binding(ActivityMainBinding::inflate)
 
     val STORAGE = permission.WRITE_EXTERNAL_STORAGE
     val RECORD_AUDIO = permission.RECORD_AUDIO
@@ -32,13 +36,13 @@ class MainActivity : AppCompatActivity() ,EasyPermissions.PermissionCallbacks{
     private val defaultRecorderCallBack = RecorderManager.DefaultRecorderCallBack(
         {
             Log.d("MainActivity", it.toString())
-            textState.text = "录音中"
+            binding.textState.text = "录音中"
         }, {
             Log.d("MainActivity", it.toString())
-            textState.text = "已停止"
+            binding.textState.text = "已停止"
         }, { error, result ->
-            Log.d("MainActivity", error + " ${result.toString()}")
-            textState.text = error
+            Log.d("MainActivity", "$error $result")
+            binding.textState.text = error
         }
     )
 
@@ -47,10 +51,10 @@ class MainActivity : AppCompatActivity() ,EasyPermissions.PermissionCallbacks{
         setContentView(R.layout.activity_main)
         RecorderManager.initialize(this) {
             if (it) {
-                textState.text = "连接服务成功"
+                binding.textState.text = "连接服务成功"
                 RecorderManager.registerCallback(defaultRecorderCallBack)
             } else {
-                textState.text = "连接服务失败"
+                binding.textState.text = "连接服务失败"
                 Log.d("MainActivity", "服务连接失败")
             }
         }
@@ -59,7 +63,7 @@ class MainActivity : AppCompatActivity() ,EasyPermissions.PermissionCallbacks{
     }
 
     private fun setOnClick() {
-        buttonStart.setOnClickListener {
+        binding.buttonStart.setOnClickListener {
             hasPermission()
             recorderConfig =
                 RecorderConfig(File(filePath.plus("CallRecordings").plus(File.separator) + System.currentTimeMillis() + ".pcm"))
@@ -67,7 +71,7 @@ class MainActivity : AppCompatActivity() ,EasyPermissions.PermissionCallbacks{
             recorderConfig?.recorderOutFormat = RecorderOutFormat.PCM
             RecorderManager.startRecording(recorderConfig)
         }
-        buttonStop.setOnClickListener {
+        binding.buttonStop.setOnClickListener {
             RecorderManager.stopRecording(recorderConfig)
         }
     }
